@@ -1,0 +1,28 @@
+{{- if and .Values.agent.enabled (not (semverCompare ">=1.33.0" .Capabilities.KubeVersion.Version)) }}
+{{- fail "agent requires Kubernetes >=1.33.0 for stable recursive read-only mounts" }}
+{{- end }}
+{{- if and (or .Values.agent.enabled .Values.companion.enabled) (not (trim .Values.clusterId)) }}
+{{- fail "clusterId must be explicitly nonempty when either component is enabled" }}
+{{- end }}
+{{- range $component := list "agent" "companion" }}
+{{- $settings := index $.Values $component }}
+{{- if $settings.enabled }}
+{{- if and (eq $component "companion") $settings.placement.enabled (or (not $settings.credentials.existingSecret) (not $.Values.deviceMappings)) }}
+{{- fail "companion placement requires credentials.existingSecret and nonempty deviceMappings even in dry-run" }}
+{{- end }}
+{{- if and (not $settings.dryRun) (or (not $settings.credentials.existingSecret) (not $.Values.deviceMappings)) }}
+{{- fail (printf "%s apply mode requires credentials.existingSecret and nonempty deviceMappings" $component) }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "inventory.name" $ }}-{{ $component }}
+  labels:
+    {{- include "inventory.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+data:
+  config.json: |
+    {{- include "inventory.config" (dict "root" $ "component" $component) | nindent 4 }}
+{{- end }}
+{{- end }}

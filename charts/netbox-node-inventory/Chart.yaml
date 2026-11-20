@@ -1,0 +1,6 @@
+apiVersion: v2
+name: netbox-node-inventory
+description: Independent hardware agent and Kubernetes companion for remote NetBox
+type: application
+version: 0.2.0
+appVersion: "0.2.0"

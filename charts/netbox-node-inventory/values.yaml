@@ -1,0 +1,67 @@
+# Modified for portable extraction: endpoints and image repositories are examples.
+netbox:
+  url: https://netbox.example.com
+clusterId: ""
+deviceMappings: {}
+intervalSeconds: 3600
+jitterSeconds: 60
+gracePeriodSeconds: 300
+relistSeconds: 300
+watchTimeoutSeconds: 60
+imagePullSecrets: []
+openshift:
+  enabled: false
+agent:
+  enabled: true
+  dryRun: true
+  image:
+    repository: registry.example.com/netbox-hardware-agent
+    tag: "0.2.0"
+    digest: ""
+    pullPolicy: IfNotPresent
+  credentials:
+    existingSecret: ""
+    key: token
+  sourceConfigMap: ""
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+companion:
+  placement:
+    enabled: false
+    dryRun: true
+    fields: {}
+  enabled: true
+  dryRun: true
+  image:
+    repository: registry.example.com/netbox-kubernetes-companion
+    tag: "0.2.0"
+    digest: ""
+    pullPolicy: IfNotPresent
+  credentials:
+    existingSecret: ""
+    key: token
+  sourceConfigMap: ""
+  nodeSelector:
+    kubernetes.io/arch: amd64
+  tolerations: []
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi

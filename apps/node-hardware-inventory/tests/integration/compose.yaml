@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: docker.io/library/postgres:18-alpine@sha256:ff64c9e3bdf8e2120107d3559de8db314e8305f7e38c5105903c6295876738ff
+    environment:
+      POSTGRES_DB: netbox
+      POSTGRES_USER: netbox
+      POSTGRES_PASSWORD: disposable-fixture
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U netbox]
+      interval: 2s
+      timeout: 2s
+      retries: 60
+  valkey:
+    image: docker.io/valkey/valkey:9.1-alpine@sha256:56729e68bdda139cbd3f6a2538683dc3523325fc5711ea1a379938f1b37893f0
+    command: [valkey-server, --save, '', --appendonly, 'no']
+  runner:
+    image: ghcr.io/netbox-community/netbox:v4.6.5-5.0.2@sha256:691ec1a4f569f3dfb9fefd9f086cca1b39689ad59c3eae753712a741447e5e60
+    entrypoint: [/opt/netbox/venv/bin/python, /opt/netbox/netbox/manage.py]
+    command: [test, integration_inventory, --noinput, --verbosity, '2']
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+    environment:
+      DB_HOST: postgres
+      DB_NAME: netbox
+      DB_USER: netbox
+      DB_PASSWORD: disposable-fixture
+      REDIS_HOST: valkey
+      REDIS_CACHE_HOST: valkey
+      SECRET_KEY: disposable-integration-only-not-a-production-secret-0123456789
+      ALLOWED_HOSTS: '*'
+      SKIP_SUPERUSER: 'true'
+      PYTHONPATH: /test-code:/runtime:/runtime/tests:/runtime/activation
+      INVENTORY_INJECT_FAILURE: ${INVENTORY_INJECT_FAILURE:-0}
+    volumes:
+      - .:/test-code:ro
+      - ../..:/runtime:ro
+networks:
+  default:
+    internal: true

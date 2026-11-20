@@ -1,0 +1,44 @@
+{{- range $component := list "agent" "companion" }}
+{{- $settings := index $.Values $component }}
+{{- if $settings.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "inventory.name" $ }}-{{ $component }}
+  labels:
+    {{- include "inventory.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+automountServiceAccountToken: {{ eq $component "companion" }}
+{{- end }}
+{{- end }}
+{{- if .Values.companion.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "inventory.name" . }}-companion
+  labels:
+    {{- include "inventory.labels" . | nindent 4 }}
+    app.kubernetes.io/component: companion
+rules:
+  - apiGroups: [""]
+    resources: [nodes]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "inventory.name" . }}-companion
+  labels:
+    {{- include "inventory.labels" . | nindent 4 }}
+    app.kubernetes.io/component: companion
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "inventory.name" . }}-companion
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "inventory.name" . }}-companion
+    namespace: {{ .Release.Namespace | quote }}
+{{- end }}

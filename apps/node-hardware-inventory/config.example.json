@@ -1,0 +1,13 @@
+{
+  "netbox_url": "https://netbox.example.com",
+  "cluster_id": "example-cluster",
+  "dry_run": true,
+  "device_mappings": {},
+  "token_file": "/run/netbox/token",
+  "host_root": "/host",
+  "interval_seconds": 3600,
+  "jitter_seconds": 60,
+  "grace_period_seconds": 300,
+  "relist_seconds": 300,
+  "watch_timeout_seconds": 60
+}

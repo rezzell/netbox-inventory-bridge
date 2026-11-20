@@ -1,0 +1,60 @@
+{{- if and .Values.agent.enabled .Values.openshift.enabled }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: {{ include "inventory.name" . }}-agent
+  labels:
+    {{- include "inventory.labels" . | nindent 4 }}
+    app.kubernetes.io/component: agent
+allowPrivilegedContainer: false
+allowPrivilegeEscalation: false
+allowHostDirVolumePlugin: true
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowedCapabilities: []
+requiredDropCapabilities: [ALL]
+readOnlyRootFilesystem: true
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: MustRunAs
+fsGroup:
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+seccompProfiles: [runtime/default]
+volumes: [configMap, hostPath, secret]
+users: []
+groups: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "inventory.name" . }}-agent-scc
+  labels:
+    {{- include "inventory.labels" . | nindent 4 }}
+    app.kubernetes.io/component: agent
+rules:
+  - apiGroups: [security.openshift.io]
+    resources: [securitycontextconstraints]
+    resourceNames: [{{ include "inventory.name" . }}-agent]
+    verbs: [use]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "inventory.name" . }}-agent-scc
+  labels:
+    {{- include "inventory.labels" . | nindent 4 }}
+    app.kubernetes.io/component: agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "inventory.name" . }}-agent-scc
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "inventory.name" . }}-agent
+    namespace: {{ .Release.Namespace | quote }}
+{{- end }}
