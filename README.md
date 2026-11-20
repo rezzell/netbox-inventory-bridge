@@ -10,7 +10,7 @@ The agent collects Linux hardware through bounded read-only host mounts and veri
 
 ## Local verification
 
-Run from the repository root. Python 3 is required; chart tests also require Helm and Ruby's standard YAML/JSON libraries. Application and bootstrap unit tests use synthetic data and fake APIs; no live credentials or services are needed.
+Run from the repository root. Python 3 is required; chart tests use Helm 4.3.2 and Ruby's standard YAML/JSON libraries. Application and bootstrap unit tests use synthetic data and fake APIs; no live credentials or services are needed.
 
 ```sh
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s apps/node-hardware-inventory/tests -q
@@ -43,7 +43,7 @@ Deterministic tests exercise both hardware/lifecycle race orders, placement coex
 
 ## Helm repository
 
-The default-branch workflow validates charts and publishes the Helm repository to GitHub Pages. After a successful publication:
+The default-branch workflow uses the locally verified Helm 4.3.2 to validate charts and publish the Helm repository to GitHub Pages. After a successful publication:
 
 ```sh
 helm repo add inventory-bridge https://rezzell.github.io/netbox-inventory-bridge/

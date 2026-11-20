@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
       - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         with:
-          version: v3.19.0
+          version: v4.3.2
       - run: |
           python3 -m unittest discover -s apps/node-hardware-inventory/tests -q
           python3 -m unittest discover -s apps/node-hardware-inventory/activation -p 'test_*.py' -q
@@ -49,7 +49,7 @@ jobs:
           fetch-depth: 0
       - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         with:
-          version: v3.19.0
+          version: v4.3.2
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - run: python3 scripts/build-chart-repository.py --output dist --url https://rezzell.github.io/netbox-inventory-bridge/
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
