@@ -63,7 +63,7 @@ def main():
                         target.addfile(entry, source.extractfile(entry) if entry.isfile() else None)
                 output = args.output / package.name
                 compressed = io.BytesIO()
-                with gzip.GzipFile(filename='', fileobj=compressed, mode='wb', mtime=0) as stream:
+                with gzip.GzipFile(filename='', fileobj=compressed, mode='wb', mtime=0, compresslevel=9) as stream:
                     stream.write(normalized.getvalue())
                 archive_bytes = compressed.getvalue()
                 if output.exists() and output.read_bytes() != archive_bytes:

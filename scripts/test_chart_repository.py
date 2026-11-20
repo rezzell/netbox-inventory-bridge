@@ -1,5 +1,7 @@
 """Exercise publication history, reproducibility and immutable versions locally."""
 from pathlib import Path
+import gzip
+import io
 import shutil
 import subprocess
 import tempfile
@@ -27,6 +29,11 @@ class ChartRepositoryTests(unittest.TestCase):
             command = ('python3', str(SCRIPT), '--url', 'https://example.invalid/', '--output', str(root / 'dist'))
             run(*command)
             first = (root / 'dist/netbox-node-inventory-0.2.0.tgz').read_bytes()
+            expected = io.BytesIO()
+            with gzip.GzipFile(filename='', fileobj=expected, mode='wb', mtime=0, compresslevel=9) as stream:
+                stream.write(gzip.decompress(first))
+            self.assertEqual(first[8], 2)  # XFL marks maximum compression.
+            self.assertEqual(first, expected.getvalue())
             run(*command)
             self.assertEqual(first, (root / 'dist/netbox-node-inventory-0.2.0.tgz').read_bytes())
             metadata = chart / 'Chart.yaml'
